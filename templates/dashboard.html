@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard - Billing</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { background: #f0f2f5; }
+        .card { border: none; border-radius: 12px; }
+        .stat-card { border-left: 4px solid; }
+        .stat-card.blue { border-color: #0d6efd; }
+        .stat-card.green { border-color: #198754; }
+        .stat-card.orange { border-color: #fd7e14; }
+        .stat-card.red { border-color: #dc3545; }
+        .stat-card.purple { border-color: #6f42c1; }
+        .stat-icon { font-size: 2rem; opacity: 0.2; }
+        .aging-bar { height: 10px; border-radius: 5px; }
+        .navbar-brand { font-weight: 700; font-size: 1.4rem; }
+    </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-dark bg-dark px-4 shadow-sm">
+    <span class="navbar-brand">
+        <i class="fa fa-heartbeat me-2 text-danger"></i>Medical Billing
+    </span>
+    <div>
+        <a href="/claims/" class="btn btn-outline-light btn-sm">
+            <i class="fa fa-file-medical me-1"></i>Claims
+        </a>
+    </div>
+</nav>
+
+<div class="container-fluid px-4 py-4">
+
+    <h4 class="fw-bold mb-4 text-dark">
+        <i class="fa fa-chart-line me-2 text-primary"></i>Dashboard Overview
+    </h4>
+
+    <!-- KPI Cards Row 1 -->
+    <div class="row g-3 mb-4">
+
+        <div class="col-md-4">
+            <div class="card shadow-sm stat-card blue p-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="text-muted mb-1 small">Total Claims</p>
+                        <h3 class="fw-bold mb-0">{{ total_claims }}</h3>
+                    </div>
+                    <i class="fa fa-file-invoice stat-icon text-primary"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm stat-card green p-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="text-muted mb-1 small">Total Charges</p>
+                        <h3 class="fw-bold mb-0">${{ total_revenue }}</h3>
+                    </div>
+                    <i class="fa fa-dollar-sign stat-icon text-success"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm stat-card purple p-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="text-muted mb-1 small">Paid Revenue</p>
+                        <h3 class="fw-bold mb-0">${{ paid_revenue }}</h3>
+                    </div>
+                    <i class="fa fa-check-circle stat-icon text-purple"></i>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- KPI Cards Row 2 -->
+    <div class="row g-3 mb-4">
+
+        <div class="col-md-4">
+            <div class="card shadow-sm stat-card orange p-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="text-muted mb-1 small">Pending Claims</p>
+                        <h3 class="fw-bold mb-0">{{ pending_claims }}</h3>
+                    </div>
+                    <i class="fa fa-clock stat-icon text-warning"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm stat-card red p-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="text-muted mb-1 small">Denial Rate</p>
+                        <h3 class="fw-bold mb-0">{{ denial_rate }}%</h3>
+                    </div>
+                    <i class="fa fa-times-circle stat-icon text-danger"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm stat-card green p-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="text-muted mb-1 small">Net Collection Rate</p>
+                        <h3 class="fw-bold mb-0">{{ net_collection_rate }}%</h3>
+                    </div>
+                    <i class="fa fa-percentage stat-icon text-success"></i>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Clean Claim Rate + AR Aging -->
+    <div class="row g-3">
+
+        <!-- Clean Claim Rate -->
+        <div class="col-md-4">
+            <div class="card shadow-sm p-3 h-100">
+                <h6 class="fw-bold mb-3">
+                    <i class="fa fa-star me-2 text-warning"></i>Clean Claim Rate
+                </h6>
+                <div class="text-center py-3">
+                    <h1 class="fw-bold text-success display-4">{{ clean_claim_rate }}%</h1>
+                    <p class="text-muted">Claims Accepted or Paid</p>
+                </div>
+                <div class="progress" style="height:12px;">
+                    <div class="progress-bar bg-success"
+                         style="width: {{ clean_claim_rate }}%"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AR Aging -->
+        <div class="col-md-8">
+            <div class="card shadow-sm p-3 h-100">
+                <h6 class="fw-bold mb-3">
+                    <i class="fa fa-hourglass me-2 text-warning"></i>AR Aging (Unpaid Claims)
+                </h6>
+                <div class="row text-center mb-3">
+                    <div class="col">
+                        <div class="p-2 rounded" style="background:#e8f5e9;">
+                            <h4 class="fw-bold text-success mb-0">{{ aging_0_30 }}</h4>
+                            <small class="text-muted">0–30 Days</small>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="p-2 rounded" style="background:#fff8e1;">
+                            <h4 class="fw-bold text-warning mb-0">{{ aging_31_60 }}</h4>
+                            <small class="text-muted">31–60 Days</small>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="p-2 rounded" style="background:#fff3e0;">
+                            <h4 class="fw-bold text-orange mb-0">{{ aging_61_90 }}</h4>
+                            <small class="text-muted">61–90 Days</small>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="p-2 rounded" style="background:#ffebee;">
+                            <h4 class="fw-bold text-danger mb-0">{{ aging_90_plus }}</h4>
+                            <small class="text-muted">90+ Days</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>
